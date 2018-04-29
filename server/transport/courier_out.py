@@ -12,13 +12,16 @@ class CourierOutbound:
             task = self._q.get()
             if task[0] == 0:     #  traffic going to a socket
                 if task[1] in self._sq:
-                    print('queueing packet: {0} for sending to: {1}'.format(task[2], task[1]))
                     self._sq[task[1]].put(task[2])
-                elif task[1] in self._users and self._users[task[1]] in self._sq:
-                    self._sq[self._users[task[1]]].put(task[2])
+                elif task[1] in self._clients and self._clients[task[1]] in self._sq:
+                    self._sq[self._clients[task[1]]].put(task[2])
             elif task[0] == 1:   #  new address/socketQ 
                 self._sq[task[1]] = task[2]
+            elif task[0] == 2:   #  new clientid/username mapping
+                self._clients[task[1]] = task[2]
+                print('mapped {0} to {1}'.format(task[1], task[2]))
             elif task[0] == -1:  #  inbound socket closed
-                self._clients
+                #  self._sq.pop()
+                self._clients.pop(task[1], None)
     def run(self):
         start_new_thread(self._loop, tuple())

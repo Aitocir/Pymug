@@ -7,9 +7,9 @@ import queue
 import time
 from _thread import start_new_thread
 
-from transport.socket_in import recv_socket
-from transport.socket_out import send_socket
-from transport import courier
+from client.transport.socket_in import recv_socket
+from client.transport.socket_out import send_socket
+from client.transport import courier
 
 #  TODO: make this enterable (have a non-connected mode for client with connect, quit, settings commands)
 host = 'localhost'
