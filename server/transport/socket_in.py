@@ -27,8 +27,6 @@ def recv_socket(s, q, id, lenbytes=2):
                 packetSize = int.from_bytes(data[:lenbytes], 'big')
                 data = data[lenbytes:]
             working = packetSize == -1 or len(data) < packetSize
-            #print('...')
         message = data[:packetSize]
-        #print('queueing: {0}'.format(_packet(id, message)))
         q.put(_packet(id, message))
         overflowData = data[packetSize:]

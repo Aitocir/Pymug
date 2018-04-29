@@ -5,33 +5,36 @@ import ssl
 import sys
 import queue
 import time
+from _thread import start_new_thread
 
 from transport.socket_in import recv_socket
 from transport.socket_out import send_socket
+from transport import courier
 
+#  TODO: make this enterable (have a non-connected mode for client with connect, quit, settings commands)
 host = 'localhost'
 port = 29999
 
 sock = socket.socket()
 s = ssl.wrap_socket(sock, server_side=False, ssl_version=ssl.PROTOCOL_TLSv1_2)
-
 s.connect((host, port))
 
+qrecv = queue.Queue()
+qsend = queue.Queue()
+start_new_thread(recv_socket, (s, qrecv,))
+start_new_thread(send_socket, (s, qsend,))
+
+#  TODO: real UI with different input and output text boxes
+start_new_thread(courier.print_responses, (qrecv,))
+
 while True:
+    
     line = input().strip()
     if line == 'exit':
         break
-    s.send(bytes(len(line).to_bytes(2, 'big')+bytes([ord(x) for x in line])))
-    time.sleep(1)
-    resp = s.recv(1024)
-    print(str(resp[2:], encoding='utf-8'))
+    
+    message = courier.pack_text(line)
+    qsend.put(message)
+    
+    
 s.close()
-
-
-
-"""
-for i in range(65,75):
-    s.send(bytes([0,1,i]))
-    time.sleep(1)
-s.close()
-"""
