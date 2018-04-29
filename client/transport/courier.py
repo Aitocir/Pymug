@@ -2,6 +2,7 @@
 def pack_text(text):
     return bytes(text, encoding='utf-8')
 
-def print_responses(q):
+def print_responses(q, messenger):
     while True:
-        print(str(q.get(), encoding='utf-8'))
+        content = messenger._unpack(q.get())
+        print(content)

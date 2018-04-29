@@ -13,8 +13,10 @@ from server.transport.socket_out import send_socket
 from server.storage.login import LoginDAO
 from server.storage.game import GameDAO
 
-from server.game.input_processor import process_game_input
+from server.game.input import process_typed_input
 from server.game.system_commands import system_cmds
+
+import common.messages as messenger
 
 class PymugServer:
     def __init__(self, certfile, keyfile):
@@ -59,6 +61,17 @@ class PymugServer:
     def register_player_command(self, cmd, gamefunc):
         if isinstance(cmd, str) and callable(gamefunc):
             self._usercmds[cmd] = gamefunc
+        else:
+            raise ValueError('cmd must be a string, and gamefunc must be a function')
+    
+    def register_system_command(self, cmd, gamefunc):
+        if isinstance(cmd, str) and callable(gamefunc):
+            if cmd in self._syscmds:
+                self._syscmds[cmd] = gamefunc
+            else:
+                raise ValueError('"{0}" is not a recognized system command'.format(cmd))
+        else:
+            raise ValueError('cmd must be a string, and gamefunc must be a function')
     
     #
     #  magick time
@@ -74,12 +87,12 @@ class PymugServer:
         #
         #  setup architecture
         logindao = LoginDAO(self._db_host, self._db_port, 'login')
-        courier_in = CourierInbound(q_courier_in, q_courier_out, q_gamethread, logindao)
-        courier_out = CourierOutbound(q_courier_out)
+        courier_in = CourierInbound(q_courier_in, q_courier_out, q_gamethread, logindao, messenger)
+        courier_out = CourierOutbound(q_courier_out, messenger)
         courier_in.run()
         courier_out.run()
         for _ in range(self._gamethreads):
-            start_new_thread(process_game_input, (q_gamethread, q_courier_out, self._usercmds, self._syscmds, GameDAO()))
+            start_new_thread(process_typed_input, (q_gamethread, q_courier_out, self._usercmds, self._syscmds, GameDAO(), messenger))
         
         #
         #  connection loop

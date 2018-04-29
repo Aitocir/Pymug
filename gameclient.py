@@ -11,6 +11,8 @@ from client.transport.socket_in import recv_socket
 from client.transport.socket_out import send_socket
 from client.transport import courier
 
+import common.messages as messenger
+
 #  TODO: make this enterable (have a non-connected mode for client with connect, quit, settings commands)
 host = 'localhost'
 port = 29999
@@ -25,7 +27,7 @@ start_new_thread(recv_socket, (s, qrecv,))
 start_new_thread(send_socket, (s, qsend,))
 
 #  TODO: real UI with different input and output text boxes
-start_new_thread(courier.print_responses, (qrecv,))
+start_new_thread(courier.print_responses, (qrecv,messenger,))
 
 while True:
     
@@ -33,7 +35,7 @@ while True:
     if line == 'exit':
         break
     
-    message = courier.pack_text(line)
+    message = messenger._pack(messenger.plain_text(line))
     qsend.put(message)
     
     
