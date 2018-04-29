@@ -19,8 +19,9 @@ class GameDAO:
     #  set a Component of an Entity
     #  -> bool (success)
     def set_component_for_entity(self, component_name, component_value, entity_name):
-        if isinstance(component_name, str) and isinstance(component_value, dict) and component_value['entity']==entity_name:
+        if isinstance(component_name, str) and isinstance(component_value, dict):
             try:
+                component_value['entity'] = entity_name
                 result = r.table(component_name).insert(
                     component_value,
                     conflict = 'replace'
@@ -29,13 +30,14 @@ class GameDAO:
                 return False
             return True
         else:
-            raise ValueError('component_name and entity_name must be strings, component_value must be a dict with key "entity" set to entity_name')
+            raise ValueError('component_name and entity_name must be strings, component_value must be a dict')
     #
     #  update a Component of an Entity
     #  -> bool (success)
     def update_component_for_entity(self, component_name, component_value, entity_name):
-        if isinstance(component_name, str) and isinstance(component_value, dict) and component_value['entity']==entity_name:
+        if isinstance(component_name, str) and isinstance(component_value, dict):
             try:
+                component_value['entity'] = entity_name
                 result = r.table(component_name).get(entity_name).update(
                     component_value
                     ).run(self._conn)
@@ -43,7 +45,7 @@ class GameDAO:
                 return False
             return True
         else:
-            raise ValueError('component_name and entity_name must be strings, component_value must be a dict with key "entity" set to entity_name')
+            raise ValueError('component_name and entity_name must be strings, component_value must be a dict')
     #
     #  delete a Component of an Entity
     #  -> bool (success)
@@ -56,3 +58,54 @@ class GameDAO:
             return True
         else:
             raise ValueError('component_name and entity_name must be strings')
+    
+    #
+    #  get all Entities matching provided value
+    #  -> [document]
+    def get_matching_entities(self, component_name, component_value):
+        if isinstance(component_name, str) and isinstance(component_value, dict):
+            try:
+                results = r.table(component_name).filter(component_value).run(self._conn)
+                entities = [x['entity'] for x in results]
+            except:
+                return []
+            return entities
+        else:
+            raise ValueError('component_name must be a string, and component_value must be a dict')
+    #
+    #  get all Components matching provided value
+    #  -> [document]
+    def get_matching_components(self, component_name, component_value):
+        if isinstance(component_name, str) and isinstance(component_value, dict):
+            try:
+                results = r.table(component_name).filter(component_value).run(self._conn)
+            except:
+                return []
+            return results
+        else:
+            raise ValueError('component_name must be a string, and component_value must be a dict')
+    #
+    #  get all Entities for Component
+    #  -> [document]
+    def get_all_entities(self, component_name):
+        if isinstance(component_name, str):
+            try:
+                results = r.table(component_name).run(self._conn)
+                entities = [x['entity'] for x in results]
+            except:
+                raise ValueError('The component "{0}" wasn\'t found in the database'.format(component_name))
+            return entities
+        else:
+            raise ValueError('component_name must be a string')
+    #
+    #  get all Components for Component
+    #  -> [document]
+    def get_all_components(self, component_name):
+        if isinstance(component_name, str):
+            try:
+                results = r.table(component_name).run(self._conn)
+            except:
+                raise ValueError('The component "{0}" wasn\'t found in the database'.format(component_name))
+            return results
+        else:
+            raise ValueError('component_name must be a string')

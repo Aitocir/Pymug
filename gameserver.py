@@ -5,18 +5,18 @@ import ssl
 import sys
 import queue
 
-from server.transport.courier_in import *
-from server.transport.courier_out import *
-from server.transport.socket_in import recv_socket
-from server.transport.socket_out import send_socket
+from .server.transport.courier_in import *
+from .server.transport.courier_out import *
+from .server.transport.socket_in import recv_socket
+from .server.transport.socket_out import send_socket
 
-from server.storage.login import LoginDAO
-from server.storage.game import GameDAO
+from .server.storage.login import LoginDAO
+from .server.storage.game import GameDAO
 
-from server.game.input import process_typed_input
-from server.game.system_commands import system_cmds
+from .server.game.input import process_typed_input
+from .server.game.system_commands import system_cmds
 
-import common.messages as messenger
+from .common import messages as messenger
 
 class PymugServer:
     def __init__(self, certfile, keyfile):
@@ -64,7 +64,7 @@ class PymugServer:
         else:
             raise ValueError('cmd must be a string, and gamefunc must be a function')
     
-    def register_system_command(self, cmd, gamefunc):
+    def override_system_command(self, cmd, gamefunc):
         if isinstance(cmd, str) and callable(gamefunc):
             if cmd in self._syscmds:
                 self._syscmds[cmd] = gamefunc
@@ -76,6 +76,21 @@ class PymugServer:
     #
     #  magick time
     #
+    
+    def init_db(self, components=[]):
+        import rethinkdb as r
+        c = r.connect(self._db_host, self._db_port)
+        
+        dbs = r.db_list().run(c)
+        if 'login' not in dbs:
+            r.db_create('login').run(c)
+        if 'game' not in dbs:
+            r.db_create('game').run(c)
+        
+        db_comps = set(r.db('game').table_list().run(c))
+        for x in set(components).difference(db_comps):
+            r.db('game').table_create(x, primary_key='entity').run(c)
+        c.close()
     
     def run(self, debug=False):
         #
