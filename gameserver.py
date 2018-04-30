@@ -4,6 +4,7 @@ import socket
 import ssl
 import sys
 import queue
+import rethinkdb as r
 
 from .server.transport.courier_in import *
 from .server.transport.courier_out import *
@@ -30,6 +31,7 @@ class PymugServer:
         self._connbuffer = 5
         self._usercmds = {}
         self._syscmds = system_cmds()
+        self._c = None
     
     #
     #  server property setters
@@ -78,21 +80,26 @@ class PymugServer:
     #
     
     def init_db(self, components=[]):
-        import rethinkdb as r
-        c = r.connect(self._db_host, self._db_port)
+        self._c = r.connect(self._db_host, self._db_port)
         
-        dbs = r.db_list().run(c)
+        dbs = r.db_list().run(self._c)
         if 'login' not in dbs:
-            r.db_create('login').run(c)
+            r.db_create('login').run(self._c)
+            r.db('login').table_create('registrations', primary_key='username').run(self._c)
         if 'game' not in dbs:
-            r.db_create('game').run(c)
+            r.db_create('game').run(self._c)
         
-        db_comps = set(r.db('game').table_list().run(c))
+        db_comps = set(r.db('game').table_list().run(self._c))
         for x in set(components).difference(db_comps):
-            r.db('game').table_create(x, primary_key='entity').run(c)
-        c.close()
+            r.db('game').table_create(x, primary_key='entity').run(self._c)
+    
+    def add_to_db(self, db, table, obj):
+        r.db(db).table(table).insert(obj, conflict=lambda id, old_doc, newdoc: old_doc).run(self._c)
     
     def run(self, debug=False):
+        if self._c != None:
+            self._c.close()
+        
         #
         #  define queues
         q_courier_in = queue.Queue()
