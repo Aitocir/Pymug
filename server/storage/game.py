@@ -11,8 +11,7 @@ class GameDAO:
             try:
                 result = r.table(component_name).get(entity_name).run(self._conn)
             except:
-                print('failed GET')
-                return None
+                raise
             return result
         else:
             raise ValueError('component_name and entity_name must be strings')
@@ -29,8 +28,6 @@ class GameDAO:
                     ).run(self._conn)
             except:
                 raise
-                print('failed SET')
-                return False
             return True
         else:
             raise ValueError('component_name and entity_name must be strings, component_value must be a dict')
@@ -45,7 +42,7 @@ class GameDAO:
                     component_value
                     ).run(self._conn)
             except:
-                return False
+                raise
             return True
         else:
             raise ValueError('component_name and entity_name must be strings, component_value must be a dict')
@@ -57,7 +54,7 @@ class GameDAO:
             try:
                 result = r.table(component_name).get(entity_name).delete().run(self._conn)
             except:
-                return False
+                raise
             return True
         else:
             raise ValueError('component_name and entity_name must be strings')
@@ -71,7 +68,7 @@ class GameDAO:
                 results = r.table(component_name).filter(component_value).run(self._conn)
                 entities = [x['entity'] for x in results]
             except:
-                return []
+                raise
             return entities
         else:
             raise ValueError('component_name must be a string, and component_value must be a dict')
@@ -83,7 +80,7 @@ class GameDAO:
             try:
                 results = r.table(component_name).filter(component_value).run(self._conn)
             except:
-                return []
+                raise
             return results
         else:
             raise ValueError('component_name must be a string, and component_value must be a dict')
@@ -109,7 +106,7 @@ class GameDAO:
                         tmp = tmp.filter(r.row[pred[0]] != pred[2])
                 results = tmp.run(self._conn)
             except:
-                return []
+                raise
             return results
         else:
             raise ValueError('component_name must be a string, and predicates must be a list of 3-tuples')
