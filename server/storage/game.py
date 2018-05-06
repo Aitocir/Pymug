@@ -11,6 +11,7 @@ class GameDAO:
             try:
                 result = r.table(component_name).get(entity_name).run(self._conn)
             except:
+                print('failed GET')
                 return None
             return result
         else:
@@ -27,6 +28,8 @@ class GameDAO:
                     conflict = 'replace'
                     ).run(self._conn)
             except:
+                raise
+                print('failed SET')
                 return False
             return True
         else:
@@ -84,6 +87,32 @@ class GameDAO:
             return results
         else:
             raise ValueError('component_name must be a string, and component_value must be a dict')
+    #
+    #  get all Components matching provided predicates
+    #  -> [document]
+    def get_components_matching_predicates(self, component_name, predicates):
+        if isinstance(component_name, str) and isinstance(predicates, list):
+            try:
+                tmp = r.table(component_name)
+                for pred in predicates:
+                    if pred[1] == '<':
+                        tmp = tmp.filter(r.row[pred[0]] < pred[2])
+                    elif pred[1] == '<=':
+                        tmp = tmp.filter(r.row[pred[0]] <= pred[2])
+                    elif pred[1] == '>':
+                        tmp = tmp.filter(r.row[pred[0]] > pred[2])
+                    elif pred[1] == '>=':
+                        tmp = tmp.filter(r.row[pred[0]] >= pred[2])
+                    elif pred[1] == '==':
+                        tmp = tmp.filter(r.row[pred[0]] == pred[2])
+                    elif pred[1] == '!=':
+                        tmp = tmp.filter(r.row[pred[0]] != pred[2])
+                results = tmp.run(self._conn)
+            except:
+                return []
+            return results
+        else:
+            raise ValueError('component_name must be a string, and predicates must be a list of 3-tuples')
     #
     #  get all Entities for Component
     #  -> [document]
