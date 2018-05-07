@@ -92,18 +92,24 @@ class GameDAO:
             try:
                 tmp = r.table(component_name)
                 for pred in predicates:
+                    include_missing = False
+                    if len(pred) > 3:
+                        if pred[3] == True:
+                            include_missing = True
+                        else:
+                            raise ValueError('Only valid value for fourth predicate elemet is True to indicate inclusion of objects with missing field')
                     if pred[1] == '<':
-                        tmp = tmp.filter(r.row[pred[0]] < pred[2])
+                        tmp = tmp.filter(r.row[pred[0]] < pred[2], default=include_missing)
                     elif pred[1] == '<=':
-                        tmp = tmp.filter(r.row[pred[0]] <= pred[2])
+                        tmp = tmp.filter(r.row[pred[0]] <= pred[2], default=include_missing)
                     elif pred[1] == '>':
-                        tmp = tmp.filter(r.row[pred[0]] > pred[2])
+                        tmp = tmp.filter(r.row[pred[0]] > pred[2], default=include_missing)
                     elif pred[1] == '>=':
-                        tmp = tmp.filter(r.row[pred[0]] >= pred[2])
+                        tmp = tmp.filter(r.row[pred[0]] >= pred[2], default=include_missing)
                     elif pred[1] == '==':
-                        tmp = tmp.filter(r.row[pred[0]] == pred[2])
+                        tmp = tmp.filter(r.row[pred[0]] == pred[2], default=include_missing)
                     elif pred[1] == '!=':
-                        tmp = tmp.filter(r.row[pred[0]] != pred[2])
+                        tmp = tmp.filter(r.row[pred[0]] != pred[2], default=include_missing)
                 results = tmp.run(self._conn)
             except:
                 raise
