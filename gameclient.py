@@ -35,20 +35,4 @@ qscan = queue.Queue()
 start_new_thread(courier.process_requests, (qscan, qsend, messenger,))
 start_new_thread(courier.process_responses, (qrecv, qprint, messenger,))
 
-gameview.start(qscan, qprint)
-
-"""
-start_new_thread(courier.process_responses, (qrecv,messenger,))
-
-while True:
-    
-    line = input().strip()
-    if line == 'exit':
-        break
-    
-    message = messenger._pack(messenger.plain_text(line))
-    qsend.put(message)
-    
-    
-s.close()
-"""
+gameview.start(qscan, qprint, 'Pymug Client')

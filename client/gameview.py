@@ -50,7 +50,7 @@ def get_input(current_text):
                 current_text += e.unicode
     return signals, current_text
 
-def start(input_q, output_q):
+def start(input_q, output_q, view_name='Game :D'):
     pygame.init()
     #  init values
     scroll_offset = 0
@@ -74,7 +74,7 @@ def start(input_q, output_q):
     #
     #  init window
     screen = pygame.display.set_mode((800, 600))
-    pygame.display.set_caption('Game :D')
+    pygame.display.set_caption(view_name)
     screen.fill((220,220,220))
     running = True
     input_dirty = True
