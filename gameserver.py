@@ -6,19 +6,19 @@ import sys
 import queue
 import rethinkdb as r
 
-from .server.transport.courier_in import *
-from .server.transport.courier_out import *
-from .server.transport.socket_in import recv_socket
-from .server.transport.socket_out import send_socket
+from server.transport.courier_in import *
+from server.transport.courier_out import *
+from server.transport.socket_in import recv_socket
+from server.transport.socket_out import send_socket
 
-from .server.storage.login import LoginDAO
-from .server.storage.game import GameDAO
+from server.storage.login import LoginDAO
+from server.storage.game import GameDAO
 
-from .server.game.input import process_typed_input
-from .server.game.system_commands import system_cmds
-from .server.game.ecs_system import *
+from server.game.input import process_typed_input
+from server.game.system_commands import system_cmds
+from server.game.ecs_system import *
 
-from .common import messages as messenger
+from common import messages as messenger
 
 class PymugServer:
     def __init__(self, certfile, keyfile):
