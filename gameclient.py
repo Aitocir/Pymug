@@ -1,4 +1,4 @@
-#  main client file
+#  Pymug client
 
 import socket
 import ssl
@@ -15,10 +15,8 @@ from client import gameview
 
 import common.messages as messenger
 
-
-#  TODO: make this enterable (have a non-connected mode for client with connect, quit, settings commands)
-host = 'localhost'
-port = 29999
+host = sys.argv[1] if len(sys.argv)>1 else 'localhost'
+port = int(sys.argv[2]) if len(sys.argv)>2 else 29999
 
 sock = socket.socket()
 s = ssl.wrap_socket(sock, server_side=False, ssl_version=ssl.PROTOCOL_TLSv1_2)
