@@ -56,6 +56,7 @@ class CourierInbound:
             if task[0] == 0:    #  traffic from a socket
                 cid = task[1]
                 payload = self._m._unpack(task[2])
+                print('Parsed payload: {0}'.format(payload))
                 #  For now, server only accepts plain text messages from client
                 if not isinstance(payload, str):
                     #  TODO: send client error message indicating incompatible payload

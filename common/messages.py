@@ -37,4 +37,4 @@ def _pack(m):
         body = bytes(stuff, encoding='utf-8')
     if dest:
         return dest, header+body
-    return header+body
+    return None, header+body

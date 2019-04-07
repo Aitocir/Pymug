@@ -6,19 +6,19 @@ import sys
 import queue
 import rethinkdb as r
 
-from server.transport.courier_in import *
-from server.transport.courier_out import *
-from server.transport.socket_in import recv_socket
-from server.transport.socket_out import send_socket
+from .server.transport.courier_in import *
+from .server.transport.courier_out import *
+from .server.transport.socket_in import recv_socket
+from .server.transport.socket_out import send_socket
 
-from server.storage.login import LoginDAO
-from server.storage.game import GameDAO
+from .server.storage.login import LoginDAO
+from .server.storage.game import GameDAO
 
-from server.game.input import process_typed_input
-from server.game.system_commands import system_cmds
-from server.game.ecs_system import *
+from .server.game.input import process_typed_input
+from .server.game.system_commands import system_cmds
+from .server.game.ecs_system import *
 
-from common import messages as messenger
+from .common import messages as messenger
 
 class PymugServer:
     def __init__(self, certfile, keyfile):
@@ -35,6 +35,7 @@ class PymugServer:
         self._c = None
         self._clock_systems = {}
         self._timer_systems = {}
+        self._parse_type = 'none'
     
     #
     #  server property setters
@@ -58,6 +59,9 @@ class PymugServer:
     def set_connection_buffer(self, buff_len):
         if isinstance(buff_len, int):
             self._connbuffer = max(0, buff_len)
+    def set_input_parsing(self, parse_type):
+        if parse_type in set(['none', 'words']):
+            self._parse_type = parse_type
     
     #
     #  command registration
@@ -154,7 +158,7 @@ class PymugServer:
         courier_out.run()
         #  input processing threads (caller set, >= 1)
         for _ in range(self._gamethreads):
-            start_new_thread(process_typed_input, (q_gamethread, q_courier_out, self._usercmds, self._syscmds, GameDAO(), messenger))
+            start_new_thread(process_typed_input, (q_gamethread, q_courier_out, self._usercmds, self._syscmds, GameDAO(), messenger, self._parse_type))
         #  ECS system processing threads (1 per system)
         for system in self._clock_systems:
             start_new_thread(ecs_clock_system_thread, (GameDAO(), q_courier_out, messenger, system, *self._clock_systems[system]))
