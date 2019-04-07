@@ -1,4 +1,11 @@
+import os
 import pygame
+import sys
+
+def res(file):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, file)
+    return file
 
 class TextView():
     def __init__(self, text, font, rect, color=(220,220,220)):
@@ -12,17 +19,17 @@ class TextView():
         return (self.rect.x+xoff, self.rect.y+yoff)
 
 def init_inputbox(x, y, w, h):
-    inputfont = pygame.font.Font(None, 24)
+    inputfont = pygame.font.Font(res('freesansbold.ttf'), 20)
     inputbox = pygame.Rect(x, y, w, h)
     return TextView('', inputfont, inputbox)
 
 def init_outputbox(x, y, w, h):
-    outputfont = pygame.font.Font(None, 24)
+    outputfont = pygame.font.Font(res('freesansbold.ttf'), 16)
     outputbox = pygame.Rect(x, y, w, h)
     return TextView('', outputfont, outputbox)
 
 def init_statbox(x, y, w, h):
-    statfont = pygame.font.Font(None, 32)
+    statfont = pygame.font.Font(res('freesansbold.ttf'), 32)
     statbox = pygame.Rect(x, y, w, h)
     return TextView('', statfont, statbox)
 
@@ -85,7 +92,9 @@ def start(input_q, output_q, view_name='Game :D'):
         #
         #  update output with new items
         try:
-            game_messages.append(output_q.get_nowait())
+            new_content = output_q.get_nowait()
+            new_content = new_content.replace('\t', '    ')
+            game_messages.extend(new_content.split('\n'))
             game_messages = game_messages[-100:]
             output_dirty = True
         except:

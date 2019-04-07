@@ -35,6 +35,7 @@ class PymugServer:
         self._c = None
         self._clock_systems = {}
         self._timer_systems = {}
+        self._parse_type = 'none'
     
     #
     #  server property setters
@@ -58,6 +59,9 @@ class PymugServer:
     def set_connection_buffer(self, buff_len):
         if isinstance(buff_len, int):
             self._connbuffer = max(0, buff_len)
+    def set_input_parsing(self, parse_type):
+        if parse_type in set(['none', 'words']):
+            self._parse_type = parse_type
     
     #
     #  command registration
@@ -154,7 +158,7 @@ class PymugServer:
         courier_out.run()
         #  input processing threads (caller set, >= 1)
         for _ in range(self._gamethreads):
-            start_new_thread(process_typed_input, (q_gamethread, q_courier_out, self._usercmds, self._syscmds, GameDAO(), messenger))
+            start_new_thread(process_typed_input, (q_gamethread, q_courier_out, self._usercmds, self._syscmds, GameDAO(), messenger, self._parse_type))
         #  ECS system processing threads (1 per system)
         for system in self._clock_systems:
             start_new_thread(ecs_clock_system_thread, (GameDAO(), q_courier_out, messenger, system, *self._clock_systems[system]))

@@ -94,7 +94,7 @@ class GameDAO:
                 results = r.table(component_name).filter(component_value).run(self._conn)
             except:
                 raise
-            return results
+            return list(results)
         else:
             raise ValueError('component_name must be a string, and component_value must be a dict')
     #
@@ -126,7 +126,7 @@ class GameDAO:
                 results = tmp.run(self._conn)
             except:
                 raise
-            return results
+            return list(results)
         else:
             raise ValueError('component_name must be a string, and predicates must be a list of 3-tuples')
     #
@@ -151,6 +151,6 @@ class GameDAO:
                 results = r.table(component_name).run(self._conn)
             except:
                 raise ValueError('The component "{0}" wasn\'t found in the database'.format(component_name))
-            return results
+            return list(results)
         else:
             raise ValueError('component_name must be a string')

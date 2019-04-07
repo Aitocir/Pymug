@@ -21,8 +21,21 @@ def _split_out_colons(terms):
             newterms.append(term)
     return [term for term in newterms if len(term)]
 
-#  parse user command text 
-def user_command(text):
+#  parse user command text
+def user_command(text, parse_mode='none'):
+    terms = text.strip().split()
+    if len(terms) == 0:
+        return None
+    verb = terms[0]
+    if parse_mode == 'none':
+        content = text.strip()[len(verb):].strip()
+    elif parse_mode == 'words':
+        content = terms[1:]
+    return {'verb': verb, 'content': content}
+
+"""
+leaving original implementationw ith functuion name change for historical purposes
+def _user_command_original(text):
     terms = text.strip().split()
     terms = _split_out_colons(terms)
     cmd = {}
@@ -50,3 +63,4 @@ def user_command(text):
         if num:
             cmd[mode+'_num'] = num
     return cmd
+"""

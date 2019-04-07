@@ -11,13 +11,14 @@ class CourierOutbound:
     def _loop(self):
         while True:
             task = self._q.get()
+            print('task in CourierOutbound: "{0}"'.format(task))
             if task[0] == 0:     #  traffic going to a socket
                 dst, payload = self._m._pack(task)
                 if dst in self._sq:
                     self._sq[dst].put(payload)
                 elif dst in self._clients and self._clients[dst] in self._sq:
                     self._sq[self._clients[dst]].put(payload)
-            elif task[0] == 1:   #  new address/socketQ 
+            elif task[0] == 1:   #  new address/socketQ
                 self._sq[task[1]] = task[2]
             elif task[0] == 2:   #  new clientid/username mapping
                 self._clients[task[1]] = task[2]

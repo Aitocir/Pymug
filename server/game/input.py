@@ -1,7 +1,7 @@
 from .parse import user_command
 
 #  processes typed commands
-def process_typed_input(q, q_output, player_commands, system_commands, db, messenger):
+def process_typed_input(q, q_output, player_commands, system_commands, db, messenger, parse_mode):
     while True:
         task = q.get()
         #
@@ -10,12 +10,12 @@ def process_typed_input(q, q_output, player_commands, system_commands, db, messe
             if not messenger.is_plain_text(task):
                 raise ValueError('Non-plain-text message passed to typed input processor')
             username = messenger.dest(task)
-            command = user_command(messenger.payload(task))
+            command = user_command(messenger.payload(task), parse_mode)
             print(command)
             if not command:
                 continue
             if command['verb'] in player_commands:
-                output_messages = player_commands[command['verb']](username, db, messenger, command)
+                output_messages = player_commands[command['verb']](username, db, messenger, command['content'])
                 for m in output_messages:
                     q_output.put(m)
             else:
